@@ -12,14 +12,56 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
+        :root {
+            /* Dark theme variables */
+            --bg-primary: #0a0a0a;
+            --bg-secondary: #111111;
+            --bg-tertiary: #1a1a1a;
+            --bg-glass: rgba(20, 20, 20, 0.8);
+            --border-color: #1a1a1a;
+            --border-hover: #333;
+            --text-primary: #ffffff;
+            --text-secondary: #cccccc;
+            --text-muted: #888888;
+            --text-accent: #667eea;
+            --status-vacant: #333;
+            --status-occupied: #666;
+            --status-maintenance: #555;
+            --card-bg: rgba(20, 20, 20, 0.8);
+            --nav-hover: rgba(255, 255, 255, 0.05);
+            --nav-active: rgba(255, 255, 255, 0.1);
+        }
+
+        .light-theme {
+            /* Light theme variables */
+            --bg-primary: #ffffff;
+            --bg-secondary: #f8f9fa;
+            --bg-tertiary: #e9ecef;
+            --bg-glass: rgba(255, 255, 255, 0.9);
+            --border-color: #dee2e6;
+            --border-hover: #adb5bd;
+            --text-primary: #212529;
+            --text-secondary: #495057;
+            --text-muted: #6c757d;
+            --text-accent: #007bff;
+            --status-vacant: #28a745;
+            --status-occupied: #dc3545;
+            --status-maintenance: #ffc107;
+            --card-bg: rgba(255, 255, 255, 0.9);
+            --nav-hover: rgba(0, 0, 0, 0.05);
+            --nav-active: rgba(0, 0, 0, 0.1);
+        }
+
         body {
             font-family: 'Inter', sans-serif;
-            background: #0a0a0a;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            transition: background-color 0.3s ease, color 0.3s ease;
         }
         .glass-effect {
-            background: rgba(20, 20, 20, 0.8);
+            background: var(--bg-glass);
             backdrop-filter: blur(20px);
-            border: 1px solid #1a1a1a;
+            border: 1px solid var(--border-color);
         }
         .chart-container {
             position: relative;
@@ -29,18 +71,96 @@
             transition: all 0.2s ease;
         }
         .metric-card:hover {
-            border-color: #333;
+            border-color: var(--border-hover);
             transform: translateY(-1px);
         }
         .nav-link {
             transition: all 0.2s ease;
         }
         .nav-link:hover {
-            background: rgba(255, 255, 255, 0.05);
+            background: var(--nav-hover);
         }
         .nav-link.active {
-            background: rgba(255, 255, 255, 0.1);
-            border-color: #333;
+            background: var(--nav-active);
+            border-color: var(--border-hover);
+        }
+
+        /* Theme-aware overrides for Tailwind classes */
+        .glass-effect {
+            background: var(--bg-glass) !important;
+            border-color: var(--border-color) !important;
+        }
+
+        .border-gray-800 {
+            border-color: var(--border-color) !important;
+        }
+
+        .bg-gray-800 {
+            background-color: var(--bg-tertiary) !important;
+        }
+
+        .bg-gray-700 {
+            background-color: var(--bg-secondary) !important;
+        }
+
+        .text-gray-300 {
+            color: var(--text-secondary) !important;
+        }
+
+        .text-gray-400 {
+            color: var(--text-muted) !important;
+        }
+
+        .text-white {
+            color: var(--text-primary) !important;
+        }
+
+        .bg-black\/80 {
+            background-color: var(--bg-primary) !important;
+        }
+
+        .text-black {
+            color: var(--text-primary) !important;
+        }
+
+        .bg-white {
+            background-color: var(--bg-primary) !important;
+        }
+
+        .text-gray-900 {
+            color: var(--text-primary) !important;
+        }
+
+        .border-gray-700 {
+            border-color: var(--border-color) !important;
+        }
+
+        .hover\:bg-gray-700:hover {
+            background-color: var(--bg-secondary) !important;
+        }
+
+        .hover\:text-white:hover {
+            color: var(--text-primary) !important;
+        }
+
+        .hover\:border-gray-600:hover {
+            border-color: var(--border-hover) !important;
+        }
+
+        .bg-gray-400 {
+            background-color: var(--status-vacant) !important;
+        }
+
+        .bg-gray-500 {
+            background-color: var(--status-occupied) !important;
+        }
+
+        .bg-gray-600 {
+            background-color: var(--status-occupied) !important;
+        }
+
+        .bg-gray-700 {
+            background-color: var(--status-maintenance) !important;
         }
     </style>
 </head>
@@ -63,6 +183,9 @@
                         <p class="text-sm text-gray-400">Last Updated (CAT)</p>
                         <p class="text-white font-medium" id="lastUpdated">--:--</p>
                     </div>
+                    <button onclick="toggleTheme()" class="w-10 h-10 bg-gray-800 border border-gray-700 rounded-lg flex items-center justify-center hover:bg-gray-700 transition-colors">
+                        <i id="themeIcon" class="fas fa-moon text-gray-300"></i>
+                    </button>
                     <div class="w-3 h-3 bg-gray-400 rounded-full" id="connectionStatus"></div>
                 </div>
             </div>

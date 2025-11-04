@@ -11,6 +11,7 @@ class ParkingDashboard {
 
     async init() {
         try {
+            this.loadThemePreference();
             await this.setupFirebaseListeners();
             this.generateParkingGrid();
             this.updateStatistics();
@@ -293,16 +294,58 @@ class ParkingDashboard {
         errorDiv.className = 'fixed top-4 right-4 bg-gray-900 border border-gray-700 text-white px-6 py-3 rounded-lg shadow-lg z-50';
         errorDiv.textContent = message;
         document.body.appendChild(errorDiv);
-        
+
         setTimeout(() => {
             errorDiv.remove();
         }, 5000);
+    }
+
+    loadThemePreference() {
+        const savedTheme = localStorage.getItem('theme');
+        const body = document.body;
+        const themeIcon = document.getElementById('themeIcon');
+
+        if (savedTheme === 'light') {
+            body.classList.add('light-theme');
+            if (themeIcon) {
+                themeIcon.className = 'fas fa-sun text-yellow-400';
+            }
+        } else {
+            body.classList.remove('light-theme');
+            if (themeIcon) {
+                themeIcon.className = 'fas fa-moon text-gray-300';
+            }
+        }
+    }
+
+    toggleTheme() {
+        const body = document.body;
+        const themeIcon = document.getElementById('themeIcon');
+        const isLight = body.classList.contains('light-theme');
+
+        if (isLight) {
+            body.classList.remove('light-theme');
+            localStorage.setItem('theme', 'dark');
+            if (themeIcon) {
+                themeIcon.className = 'fas fa-moon text-gray-300';
+            }
+        } else {
+            body.classList.add('light-theme');
+            localStorage.setItem('theme', 'light');
+            if (themeIcon) {
+                themeIcon.className = 'fas fa-sun text-yellow-400';
+            }
+        }
     }
 }
 
 // Global functions for HTML onclick handlers
 function closeSpotDetails() {
     dashboard.closeSpotDetails();
+}
+
+function toggleTheme() {
+    dashboard.toggleTheme();
 }
 
 function openSimulator() {
