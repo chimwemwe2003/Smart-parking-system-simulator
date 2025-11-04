@@ -1,0 +1,33 @@
+{
+  "indexes": [
+    {
+      "collectionGroup": "parking_spots",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "status",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "last_updated",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "parking_spots",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "maintenance",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "last_updated",
+          "order": "DESCENDING"
+        }
+      ]
+    }
+  ],
+  "fieldOverrides": []
+}

@@ -1,0 +1,39 @@
+{
+  "name": "smart-parking-dashboard",
+  "version": "1.0.0",
+  "description": "A premium, minimalistic web-based dashboard for monitoring real-time parking spot availability in a smart parking system",
+  "main": "index.html",
+  "scripts": {
+    "start": "npx http-server -p 8080 -o",
+    "dev": "npx live-server --port=8080 --open=/index.html",
+    "build": "echo 'No build process required for this static dashboard'",
+    "test": "echo 'No tests specified'"
+  },
+  "keywords": [
+    "parking",
+    "dashboard",
+    "iot",
+    "esp32",
+    "firebase",
+    "real-time",
+    "smart-city"
+  ],
+  "author": "Smart Parking System",
+  "license": "MIT",
+  "devDependencies": {
+    "http-server": "^14.1.1",
+    "live-server": "^1.2.2"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/your-username/smart-parking-dashboard.git"
+  },
+  "bugs": {
+    "url": "https://github.com/your-username/smart-parking-dashboard/issues"
+  },
+  "homepage": "https://github.com/your-username/smart-parking-dashboard#readme",
+  "dependencies": {
+    "@dataconnect/generated": "file:src/dataconnect-generated",
+    "firebase": "^12.2.1"
+  }
+}

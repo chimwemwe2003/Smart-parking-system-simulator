@@ -1,0 +1,34 @@
+mutation CreateParkingZone @auth(level: USER) {
+  parkingZone_insert(data: {
+    name: "Zone A",
+    description: "First zone",
+    locationCoordinates: "40.7128,-74.0060",
+    totalSpaces: 100
+  })
+}
+
+query ListParkingSpaces @auth(level: USER) {
+  parkingSpaces {
+    id
+    spaceNumber
+    isOccupied
+  }
+}
+
+mutation ResolveAlert($alertId: UUID!) @auth(level: USER) {
+  alert_update(
+    id: $alertId,
+    data: {
+      status: "resolved"
+    }
+  )
+}
+
+query ListUsers @auth(level: USER) {
+  users {
+    id
+    username
+    email
+    role
+  }
+}

@@ -1,0 +1,44 @@
+type User @table {
+  username: String!
+  passwordHash: String!
+  role: String!
+  email: String
+  fullName: String
+  lastLogin: Timestamp
+}
+
+type ParkingZone @table {
+  name: String!
+  totalSpaces: Int!
+  createdAt: Timestamp!
+  description: String
+  locationCoordinates: String
+}
+
+type ParkingSpace @table {
+  spaceNumber: String!
+  zone: ParkingZone!
+  isOccupied: Boolean!
+  sensorStatus: String!
+  createdAt: Timestamp!
+  lastOccupiedAt: Timestamp
+  lastVacatedAt: Timestamp
+  sensorId: String
+}
+
+type OccupancyRecord @table {
+  parkingSpace: ParkingSpace!
+  timestamp: Timestamp!
+  isOccupied: Boolean!
+  durationMinutes: Int
+}
+
+type Alert @table {
+  alertType: String!
+  timestamp: Timestamp!
+  status: String!
+  description: String
+  parkingSpace: ParkingSpace
+  resolvedByUser: User
+  resolvedAt: Timestamp
+}

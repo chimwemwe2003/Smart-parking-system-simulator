@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Parking Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #0a0a0a;
+        }
+        .parking-spot {
+            transition: all 0.2s ease;
+            cursor: pointer;
+            border: 1px solid #1a1a1a;
+        }
+        .parking-spot:hover {
+            border-color: #333;
+            transform: translateY(-1px);
+        }
+        .occupied {
+            background: #1a1a1a;
+            border-color: #2a2a2a;
+        }
+        .occupied:hover {
+            border-color: #3a3a3a;
+        }
+        .vacant {
+            background: #0f0f0f;
+            border-color: #1a1a1a;
+        }
+        .vacant:hover {
+            border-color: #2a2a2a;
+        }
+        .maintenance {
+            background: #111111;
+            border-color: #2a2a2a;
+        }
+        .maintenance:hover {
+            border-color: #3a3a3a;
+        }
+        .pulse-animation {
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.6; }
+        }
+        .glass-effect {
+            background: rgba(20, 20, 20, 0.8);
+            backdrop-filter: blur(20px);
+            border: 1px solid #1a1a1a;
+        }
+        .nav-link {
+            transition: all 0.2s ease;
+        }
+        .nav-link:hover {
+            background: rgba(255, 255, 255, 0.05);
+        }
+        .nav-link.active {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: #333;
+        }
+        .status-indicator {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 8px;
+        }
+        .status-occupied {
+            background: #666;
+        }
+        .status-vacant {
+            background: #333;
+        }
+        .status-maintenance {
+            background: #555;
+        }
+        .simulator-btn {
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+            border: 1px solid rgba(102, 126, 234, 0.2) !important;
+        }
+        .simulator-btn:hover {
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.2) 0%, rgba(118, 75, 162, 0.2) 100%);
+            border-color: rgba(102, 126, 234, 0.4) !important;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+        }
+        .simulator-btn:active {
+            transform: translateY(0);
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.2);
+        }
+        .simulator-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+            transition: left 0.5s;
+        }
+        .simulator-btn:hover::before {
+            left: 100%;
+        }
+        .simulator-btn i {
+            transition: all 0.3s ease;
+        }
+        .simulator-btn:hover i {
+            transform: scale(1.1) rotate(5deg);
+            color: #667eea;
+        }
+        .simulator-btn.loading {
+            pointer-events: none;
+            opacity: 0.7;
+        }
+        .simulator-btn.loading i {
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        .simulator-btn.pulse {
+            animation: buttonPulse 2s infinite;
+        }
+        @keyframes buttonPulse {
+            0%, 100% { 
+                box-shadow: 0 0 0 0 rgba(102, 126, 234, 0.4);
+            }
+            50% { 
+                box-shadow: 0 0 0 8px rgba(102, 126, 234, 0);
+            }
+        }
+        .reset-btn {
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            background: linear-gradient(135deg, rgba(255, 71, 87, 0.1) 0%, rgba(255, 56, 56, 0.1) 100%);
+            border: 1px solid rgba(255, 71, 87, 0.2) !important;
+        }
+        .reset-btn:hover {
+            background: linear-gradient(135deg, rgba(255, 71, 87, 0.2) 0%, rgba(255, 56, 56, 0.2) 100%);
+            border-color: rgba(255, 71, 87, 0.4) !important;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(255, 71, 87, 0.3);
+        }
+        .reset-btn:active {
+            transform: translateY(0);
+            box-shadow: 0 4px 15px rgba(255, 71, 87, 0.2);
+        }
+        .reset-btn i {
+            transition: all 0.3s ease;
+        }
+        .reset-btn:hover i {
+            transform: scale(1.1) rotate(180deg);
+            color: #ff4757;
+        }
+    </style>
+</head>
+<body class="bg-black min-h-screen">
+    <!-- Header -->
+    <header class="glass-effect border-b border-gray-800">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center py-6">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 bg-gray-800 border border-gray-700 rounded-lg flex items-center justify-center">
+                        <i class="fas fa-parking text-gray-300 text-lg"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-2xl font-semibold text-white">Smart Parking</h1>
+                        <p class="text-sm text-gray-400">Real-time Dashboard</p>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <div class="text-right">
+                        <p class="text-sm text-gray-400">Last Updated</p>
+                        <p class="text-white font-medium" id="lastUpdated">--:--</p>
+                    </div>
+                    <div class="w-3 h-3 bg-gray-600 rounded-full pulse-animation" id="connectionStatus"></div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Navigation -->
+    <nav class="glass-effect border-b border-gray-800">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex space-x-1 py-4">
+                <a href="index.html" class="nav-link active px-4 py-2 rounded-lg text-white border border-gray-700">
+                    <i class="fas fa-tachometer-alt mr-2"></i>Dashboard
+                </a>
+                <a href="analytics.html" class="nav-link px-4 py-2 rounded-lg text-gray-400 hover:text-white border border-transparent">
+                    <i class="fas fa-chart-line mr-2"></i>Analytics
+                </a>
+                <button onclick="openSimulator()" class="nav-link px-4 py-2 rounded-lg text-gray-400 hover:text-white border border-transparent simulator-btn">
+                    <i class="fas fa-microchip mr-2"></i>Simulator
+                </button>
+                <button onclick="resetAllSpots()" class="nav-link px-4 py-2 rounded-lg text-gray-400 hover:text-white border border-transparent reset-btn">
+                    <i class="fas fa-refresh mr-2"></i>Reset Spots
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- Statistics Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+            <div class="glass-effect rounded-lg p-6 border border-gray-800">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-gray-400 text-sm font-medium">Total Spots</p>
+                        <p class="text-3xl font-semibold text-white" id="totalSpots">0</p>
+                    </div>
+                    <div class="w-12 h-12 bg-gray-800 border border-gray-700 rounded-lg flex items-center justify-center">
+                        <i class="fas fa-parking text-gray-300 text-xl"></i>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="glass-effect rounded-lg p-6 border border-gray-800">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-gray-400 text-sm font-medium">Available</p>
+                        <p class="text-3xl font-semibold text-white" id="availableSpots">0</p>
+                    </div>
+                    <div class="w-12 h-12 bg-gray-800 border border-gray-700 rounded-lg flex items-center justify-center">
+                        <i class="fas fa-check text-gray-300 text-xl"></i>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="glass-effect rounded-lg p-6 border border-gray-800">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-gray-400 text-sm font-medium">Occupied</p>
+                        <p class="text-3xl font-semibold text-white" id="occupiedSpots">0</p>
+                    </div>
+                    <div class="w-12 h-12 bg-gray-800 border border-gray-700 rounded-lg flex items-center justify-center">
+                        <i class="fas fa-times text-gray-300 text-xl"></i>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="glass-effect rounded-lg p-6 border border-gray-800">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-gray-400 text-sm font-medium">Occupancy</p>
+                        <p class="text-3xl font-semibold text-white" id="occupancyRate">0%</p>
+                    </div>
+                    <div class="w-12 h-12 bg-gray-800 border border-gray-700 rounded-lg flex items-center justify-center">
+                        <i class="fas fa-chart-bar text-gray-300 text-xl"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Parking Grid -->
+        <div class="glass-effect rounded-lg p-6 mb-8 border border-gray-800">
+            <div class="flex items-center justify-between mb-6">
+                <h2 class="text-xl font-semibold text-white">Parking Layout</h2>
+                <div class="flex items-center space-x-6 text-sm">
+                    <div class="flex items-center space-x-2">
+                        <div class="status-indicator status-vacant"></div>
+                        <span class="text-gray-400">Available</span>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <div class="status-indicator status-occupied"></div>
+                        <span class="text-gray-400">Occupied</span>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <div class="status-indicator status-maintenance"></div>
+                        <span class="text-gray-400">Maintenance</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-4" id="parkingGrid">
+                <!-- Parking spots will be dynamically generated here -->
+            </div>
+        </div>
+
+        <!-- Spot Details Panel -->
+        <div class="glass-effect rounded-lg p-6 border border-gray-800" id="spotDetailsPanel" style="display: none;">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-lg font-semibold text-white">Spot Details</h3>
+                <button onclick="closeSpotDetails()" class="text-gray-400 hover:text-white transition-colors">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+            <div id="spotDetailsContent">
+                <!-- Spot details will be populated here -->
+            </div>
+        </div>
+    </main>
+
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay" class="fixed inset-0 bg-black/80 flex items-center justify-center z-50">
+        <div class="glass-effect rounded-lg p-8 text-center border border-gray-800">
+            <div class="w-16 h-16 border-4 border-gray-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+            <p class="text-white text-lg">Connecting to parking system...</p>
+        </div>
+    </div>
+
+    <script src="firebase-config.js"></script>
+    <script src="dashboard.js"></script>
+</body>
+</html>

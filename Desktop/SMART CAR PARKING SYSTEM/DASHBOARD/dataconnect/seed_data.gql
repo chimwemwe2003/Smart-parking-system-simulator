@@ -1,0 +1,20 @@
+mutation SeedParkingZones @auth(level: USER) {
+  parkingZone_insertMany(
+    data: [
+      {
+        name: "Zone A"
+        description: "Main parking area"
+        locationCoordinates: "37.7749,-122.4194"
+        totalSpaces: 100
+        createdAt: "2024-01-01T00:00:00Z"
+      }
+      {
+        name: "Zone B"
+        description: "Overflow parking"
+        locationCoordinates: "37.7750,-122.4195"
+        totalSpaces: 50
+        createdAt: "2024-01-01T00:00:00Z"
+      }
+    ]
+  )
+}
